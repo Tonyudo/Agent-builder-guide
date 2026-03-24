@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agent Builder Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Heebo:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f9f9f8;
+    --surface: #ffffff;
+    --border: #e8e7e3;
+    --text: #1a1916;
+    --muted: #6b6960;
+    --accent: #2563eb;
+    --accent-light: #eff4ff;
+    --accent-dim: #bfcffd;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --sidebar-w: 260px;
+    --header-h: 56px;
+    --radius: 8px;
+    --font: 'DM Sans', sans-serif;
+    --font-he: 'Heebo', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  body[dir="rtl"] { font-family: var(--font-he); }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--header-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px;
+    gap: 12px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 15px; font-weight: 600; color: var(--text);
+    text-decoration: none; white-space: nowrap;
+  }
+  .logo-icon {
+    width: 28px; height: 28px; background: var(--accent);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  }
+  .logo-icon svg { width: 16px; height: 16px; fill: #fff; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .lang-btn {
+    padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
+    background: transparent; font-size: 13px; font-weight: 500;
+    cursor: pointer; color: var(--muted); transition: all .15s;
+  }
+  .lang-btn:hover { background: var(--bg); color: var(--text); }
+  .chat-toggle-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 6px;
+    background: var(--accent); color: #fff;
+    border: none; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: background .15s;
+  }
+  .chat-toggle-btn:hover { background: #1d4ed8; }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: flex;
+    margin-top: var(--header-h);
+    min-height: calc(100vh - var(--header-h));
+  }
+
+  /* ── SIDEBAR ── */
+  aside {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    position: fixed;
+    top: var(--header-h);
+    bottom: 0;
+    overflow-y: auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  body[dir="rtl"] aside { left: auto; right: 0; border-right: none; border-left: 1px solid var(--border); }
+  body[dir="ltr"] aside { left: 0; }
+  .nav-section { padding: 0 8px 8px; }
+  .nav-label {
+    font-size: 11px; font-weight: 600; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 6px 10px 4px;
+  }
+  .nav-item {
+    display: block; padding: 6px 10px; border-radius: 6px;
+    color: var(--muted); font-size: 13.5px; text-decoration: none;
+    transition: all .12s; cursor: pointer; line-height: 1.4;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+  .nav-divider { height: 1px; background: var(--border); margin: 6px 10px; }
+
+  /* ── MAIN ── */
+  main {
+    flex: 1;
+    margin-left: var(--sidebar-w);
+    padding: 48px 60px 80px;
+    max-width: calc(860px + var(--sidebar-w));
+  }
+  body[dir="rtl"] main { margin-left: 0; margin-right: var(--sidebar-w); }
+  @media (max-width: 900px) {
+    aside { display: none; }
+    main { margin-left: 0; margin-right: 0; padding: 24px 20px 60px; }
+  }
+
+  /* ── CONTENT ── */
+  .page-section { display: none; }
+  .page-section.visible { display: block; }
+
+  .hero {
+    padding: 12px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 99px;
+    font-size: 12px; font-weight: 500; margin-bottom: 14px;
+  }
+  .badge-blue { background: var(--accent-light); color: var(--accent); }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+  h1 { font-size: 32px; font-weight: 600; line-height: 1.25; margin-bottom: 12px; }
+  h2 { font-size: 22px; font-weight: 600; margin: 36px 0 12px; }
+  h3 { font-size: 17px; font-weight: 600; margin: 24px 0 8px; }
+  p { margin-bottom: 14px; color: #2d2c29; }
+  p:last-child { margin-bottom: 0; }
+  .lead { font-size: 17px; color: var(--muted); line-height: 1.7; margin-bottom: 0; }
+
+  /* cards */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px;
+    transition: box-shadow .15s;
+  }
+  .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+  .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .card-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* callouts */
+  .callout {
+    border-radius: var(--radius); padding: 14px 18px;
+    margin: 18px 0; font-size: 14px; line-height: 1.6;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout.tip { background: var(--accent-light); border-left: 3px solid var(--accent); }
+  .callout.warning { background: var(--amber-light); border-left: 3px solid var(--amber); }
+  .callout.danger { background: var(--red-light); border-left: 3px solid var(--red); }
+  .callout.success { background: var(--green-light); border-left: 3px solid var(--green); }
+  body[dir="rtl"] .callout { border-left: none; border-right: 3px solid; }
+  body[dir="rtl"] .callout.tip { border-right-color: var(--accent); }
+  body[dir="rtl"] .callout.warning { border-right-color: var(--amber); }
+  body[dir="rtl"] .callout.danger { border-right-color: var(--red); }
+  body[dir="rtl"] .callout.success { border-right-color: var(--green); }
+
+  /* code */
+  code {
+    font-family: var(--mono); font-size: 13px;
+    background: #f0eeeb; padding: 2px 6px; border-radius: 4px;
+  }
+  pre {
+    background: #1e1e1e; color: #d4d4d4;
+    border-radius: var(--radius); padding: 18px;
+    overflow-x: auto; margin: 16px 0; font-size: 13px;
+    font-family: var(--mono); line-height: 1.7;
+  }
+  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+  /* steps */
+  .steps { margin: 20px 0; }
+  .step {
+    display: flex; gap: 14px; margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .step-desc { font-size: 14px; color: var(--muted); }
+
+  /* table */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: var(--bg); font-weight: 600; text-align: left; padding: 10px 14px; border: 1px solid var(--border); }
+  body[dir="rtl"] th { text-align: right; }
+  td { padding: 9px 14px; border: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf9; }
+
+  /* checklist */
+  .checklist { list-style: none; margin: 14px 0; }
+  .checklist li {
+    padding: 6px 0 6px 24px; position: relative;
+    font-size: 14px; border-bottom: 1px solid var(--border);
+  }
+  body[dir="rtl"] .checklist li { padding: 6px 24px 6px 0; }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before {
+    content: "✓"; position: absolute; left: 0;
+    color: var(--green); font-weight: 600;
+  }
+  body[dir="rtl"] .checklist li::before { left: auto; right: 0; }
+
+  ul.bullets { padding-left: 20px; margin: 10px 0 14px; }
+  body[dir="rtl"] ul.bullets { padding-left: 0; padding-right: 20px; }
+  ul.bullets li { margin-bottom: 6px; font-size: 14px; color: #2d2c29; }
+
+  /* ── CHAT PANEL ── */
+  #chat-panel {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    width: 380px; max-height: 560px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.12);
+    display: none;
+    flex-direction: column;
+    z-index: 200;
+    overflow: hidden;
+  }
+  body[dir="rtl"] #chat-panel { right: auto; left: 24px; }
+  #chat-panel.open { display: flex; }
+  .chat-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .chat-header-info { display: flex; align-items: center; gap: 8px; }
+  .chat-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; }
+  .chat-title { font-size: 14px; font-weight: 600; }
+  .chat-sub { font-size: 12px; color: var(--muted); }
+  .chat-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 18px; line-height: 1;
+    padding: 2px 4px;
+  }
+  .chat-messages {
+    flex: 1; overflow-y: auto;
+    padding: 14px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .msg {
+    max-width: 88%; padding: 10px 13px;
+    border-radius: 10px; font-size: 13.5px; line-height: 1.55;
+    word-break: break-word;
+  }
+  .msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 3px; }
+  body[dir="rtl"] .msg.user { border-bottom-right-radius: 10px; border-bottom-left-radius: 3px; }
+  .msg.bot { background: var(--bg); color: var(--text); align-self: flex-start; border-bottom-left-radius: 3px; }
+  body[dir="rtl"] .msg.bot { border-bottom-left-radius: 10px; border-bottom-right-radius: 3px; }
+  .msg.thinking { color: var(--muted); font-style: italic; }
+  .chat-input-row {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: flex-end;
+  }
+  #chat-input {
+    flex: 1; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 13.5px; font-family: inherit;
+    resize: none; outline: none; max-height: 100px;
+    background: var(--bg);
+  }
+  #chat-input:focus { border-color: var(--accent-dim); }
+  #chat-send {
+    padding: 8px 14px; background: var(--accent); color: #fff;
+    border: none; border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 500; transition: background .15s;
+    white-space: nowrap;
+  }
+  #chat-send:hover { background: #1d4ed8; }
+  #chat-send:disabled { background: var(--border); cursor: default; }
+  .chat-suggestions {
+    padding: 0 12px 10px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .suggestion-chip {
+    padding: 4px 10px; border-radius: 99px;
+    border: 1px solid var(--border); background: var(--bg);
+    font-size: 12px; cursor: pointer; color: var(--muted);
+    transition: all .12s;
+  }
+  .suggestion-chip:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent-dim); }
+</style>
+</head>
+<body dir="ltr">
+
+<!-- HEADER -->
+<header>
+  <a class="logo" href="#" onclick="showSection('home'); return false;">
+    <div class="logo-icon">
+      <svg viewBox="0 0 16 16"><path d="M8 1a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2V2a1 1 0 0 1 1-1zm0 4a3 3 0 1 0 0 6A3 3 0 0 0 8 5zm0 1.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/></svg>
+    </div>
+    <span data-en="Agent Builder Guide" data-he="מדריך בניית סוכנים">Agent Builder Guide</span>
+  </a>
+  <div class="header-right">
+    <button class="lang-btn" onclick="toggleLang()" id="lang-btn">עב</button>
+    <button class="chat-toggle-btn" onclick="toggleChat()">
+      <span>💬</span>
+      <span data-en="Ask AI" data-he="שאל AI">Ask AI</span>
+    </button>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="nav-section">
+    <div class="nav-label" data-en="Getting Started" data-he="התחלה">Getting Started</div>
+    <a class="nav-item active" onclick="showSection('home')" data-en="Overview" data-he="סקירה כללית">Overview</a>
+    <a class="nav-item" onclick="showSection('what-is')" data-en="What is an Agent?" data-he="מה זה סוכן AI?">What is an Agent?</a>
+    <a class="nav-item" onclick="showSection('when-to-build')" data-en="When to Build One" data-he="מתי לבנות סוכן">When to Build One</a>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-section">
+    <div class="nav-label" data-en="Beginner" data-he="מתחילים">Beginner</div>
+    <a class="nav-item" onclick="showSection('concepts')" data-en="Core Concepts" data-he="מושגי יסוד">Core Concepts</a>
+    <a class="nav-item" onclick="showSection('first-agent')" data-en="Build Your First Agent" data-he="בנה את הסוכן הראשון">Build Your First Agent</a>
+    <a class="nav-item" onclick="showSection('prompt-basics')" data-en="Prompting Basics" data-he="יסודות הפרומפטינג">Prompting Basics</a>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-section">
+    <div class="nav-label" data-en="Intermediate" data-he="בינוני">Intermediate</div>
+    <a class="nav-item" onclick="showSection('tools')" data-en="Tools & Functions" data-he="כלים ופונקציות">Tools & Functions</a>
+    <a class="nav-item" onclick="showSection('memory')" data-en="Memory & Context" data-he="זיכרון והקשר">Memory & Context</a>
+    <a class="nav-item" onclick="showSection('flows')" data-en="Multi-Step Flows" data-he="זרימות מרובות שלבים">Multi-Step Flows</a>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-section">
+    <div class="nav-label" data-en="Advanced" data-he="מתקדמים">Advanced</div>
+    <a class="nav-item" onclick="showSection('multi-agent')" data-en="Multi-Agent Systems" data-he="מערכות מרובות סוכנים">Multi-Agent Systems</a>
+    <a class="nav-item" onclick="showSection('evals')" data-en="Evals & Testing" data-he="בדיקות והערכה">Evals & Testing</a>
+    <a class="nav-item" onclick="showSection('production')" data-en="Production & Safety" data-he="ייצור ובטיחות">Production & Safety</a>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-section">
+    <div class="nav-label" data-en="Reference" data-he="עזר">Reference</div>
+    <a class="nav-item" onclick="showSection('checklist')" data-en="PM Checklist" data-he="רשימת תיוג למנהל מוצר">PM Checklist</a>
+    <a class="nav-item" onclick="showSection('tips')" data-en="Tips & Tricks" data-he="טיפים וטריקים">Tips & Tricks</a>
+    <a class="nav-item" onclick="showSection('glossary')" data-en="Glossary" data-he="מילון מונחים">Glossary</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+
+<!-- HOME -->
+<section id="s-home" class="page-section visible">
+  <div class="hero">
+    <div class="badge badge-blue" data-en="Product Manager Edition" data-he="מהדורת מנהל מוצר">Product Manager Edition</div>
+    <h1 data-en="The Agent Builder Guide" data-he="מדריך בניית סוכני AI">The Agent Builder Guide</h1>
+    <p class="lead" data-en="Everything a product manager needs to go from zero to a working AI agent — without needing an engineering degree. Covers Claude, OpenAI, and general agent patterns." data-he="כל מה שמנהל מוצר צריך כדי לעבור מאפס לסוכן AI עובד — בלי צורך בתואר הנדסה. מכסה Claude, OpenAI ודפוסי סוכנים כלליים.">Everything a product manager needs to go from zero to a working AI agent — without needing an engineering degree. Covers Claude, OpenAI, and general agent patterns.</p>
+  </div>
+
+  <h2 data-en="What's inside" data-he="מה יש כאן">What's inside</h2>
+  <div class="card-grid">
+    <div class="card" onclick="showSection('concepts')" style="cursor:pointer">
+      <div class="card-icon">🧠</div>
+      <div class="card-title" data-en="Core Concepts" data-he="מושגי יסוד">Core Concepts</div>
+      <div class="card-desc" data-en="LLMs, tools, memory, loops — demystified." data-he="LLMs, כלים, זיכרון, לולאות — הסבר פשוט.">LLMs, tools, memory, loops — demystified.</div>
+    </div>
+    <div class="card" onclick="showSection('first-agent')" style="cursor:pointer">
+      <div class="card-icon">🚀</div>
+      <div class="card-title" data-en="Build Your First Agent" data-he="בנה את הסוכן הראשון">Build Your First Agent</div>
+      <div class="card-desc" data-en="Step-by-step, no code required." data-he="שלב אחר שלב, ללא קוד.">Step-by-step, no code required.</div>
+    </div>
+    <div class="card" onclick="showSection('tools')" style="cursor:pointer">
+      <div class="card-icon">🔧</div>
+      <div class="card-title" data-en="Tools & Functions" data-he="כלים ופונקציות">Tools & Functions</div>
+      <div class="card-desc" data-en="Give your agent the ability to act." data-he="תן לסוכן שלך יכולת לפעול.">Give your agent the ability to act.</div>
+    </div>
+    <div class="card" onclick="showSection('multi-agent')" style="cursor:pointer">
+      <div class="card-icon">🤝</div>
+      <div class="card-title" data-en="Multi-Agent Systems" data-he="מערכות מרובות סוכנים">Multi-Agent Systems</div>
+      <div class="card-desc" data-en="Orchestrate agents that work together." data-he="ניהול סוכנים שעובדים יחד.">Orchestrate agents that work together.</div>
+    </div>
+    <div class="card" onclick="showSection('checklist')" style="cursor:pointer">
+      <div class="card-icon">✅</div>
+      <div class="card-title" data-en="PM Checklist" data-he="רשימת תיוג">PM Checklist</div>
+      <div class="card-desc" data-en="Ship with confidence. Nothing skipped." data-he="שחרר בביטחון. לא לשכוח כלום.">Ship with confidence. Nothing skipped.</div>
+    </div>
+    <div class="card" onclick="showSection('tips')" style="cursor:pointer">
+      <div class="card-icon">💡</div>
+      <div class="card-title" data-en="Tips & Tricks" data-he="טיפים וטריקים">Tips & Tricks</div>
+      <div class="card-desc" data-en="Hard-won lessons from real builds." data-he="לקחים מניסיון בשטח.">Hard-won lessons from real builds.</div>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-icon">💬</div>
+    <div data-en="Use the <strong>Ask AI</strong> button (top right) to chat with an expert agent about any topic in this guide — it knows everything here." data-he="השתמש בכפתור <strong>שאל AI</strong> (למעלה מימין) לשוחח עם סוכן מומחה על כל נושא במדריך הזה.">Use the <strong>Ask AI</strong> button (top right) to chat with an expert agent about any topic in this guide — it knows everything here.</div>
+  </div>
+</section>
+
+<!-- WHAT IS AN AGENT -->
+<section id="s-what-is" class="page-section">
+  <div class="hero">
+    <div class="badge badge-blue" data-en="Foundations" data-he="יסודות">Foundations</div>
+    <h1 data-en="What is an AI Agent?" data-he="מה זה סוכן AI?">What is an AI Agent?</h1>
+    <p class="lead" data-en="An agent is an AI system that can reason, plan, and take actions autonomously to complete a goal — not just answer a question." data-he="סוכן הוא מערכת AI שיכולה לחשוב, לתכנן ולנקוט פעולות באופן עצמאי כדי להשיג מטרה — לא רק לענות על שאלה.">An agent is an AI system that can reason, plan, and take actions autonomously to complete a goal — not just answer a question.</p>
+  </div>
+  <h2 data-en="The key difference: LLM vs Agent" data-he="ההבדל המרכזי: LLM לעומת סוכן">The key difference: LLM vs Agent</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th data-en="LLM (Chatbot)" data-he="LLM (צ׳אטבוט)">LLM (Chatbot)</th><th data-en="Agent" data-he="סוכן">Agent</th></tr>
+      <tr><td data-en="Responds to one prompt" data-he="מגיב לפרומפט אחד">Responds to one prompt</td><td data-en="Executes multi-step tasks" data-he="מבצע משימות רב-שלביות">Executes multi-step tasks</td></tr>
+      <tr><td data-en="No memory between turns" data-he="אין זיכרון בין תורות">No memory between turns</td><td data-en="Can maintain context and state" data-he="יכול לשמור הקשר ומצב">Can maintain context and state</td></tr>
+      <tr><td data-en="Text in, text out" data-he="טקסט נכנס, טקסט יוצא">Text in, text out</td><td data-en="Can call APIs, browse, write files" data-he="יכול לקרוא APIs, לגלוש, לכתוב קבצים">Can call APIs, browse, write files</td></tr>
+      <tr><td data-en="Single pass" data-he="מעבר יחיד">Single pass</td><td data-en="Loops until goal is met" data-he="לולאה עד השגת המטרה">Loops until goal is met</td></tr>
+    </table>
+  </div>
+  <h2 data-en="The Agent Loop" data-he="לולאת הסוכן">The Agent Loop</h2>
+  <p data-en="At the core of every agent is a loop: perceive → think → act → observe → repeat." data-he="בליבת כל סוכן יש לולאה: תפיסה → חשיבה → פעולה → תצפית → חזרה.">At the core of every agent is a loop: perceive → think → act → observe → repeat.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title" data-en="Perceive" data-he="תפיסה">Perceive</div><div class="step-desc" data-en="The agent receives input: a user message, a file, a scheduled trigger, a webhook." data-he="הסוכן מקבל קלט: הודעת משתמש, קובץ, טריגר מתוזמן, webhook.">The agent receives input: a user message, a file, a scheduled trigger, a webhook.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title" data-en="Think / Plan" data-he="חשיבה / תכנון">Think / Plan</div><div class="step-desc" data-en="The LLM reasons about what to do next: call a tool? ask a clarifying question? finish?" data-he="ה-LLM מחשב מה לעשות הלאה: לקרוא לכלי? לשאול שאלת הבהרה? לסיים?">The LLM reasons about what to do next: call a tool? ask a clarifying question? finish?</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title" data-en="Act" data-he="פעולה">Act</div><div class="step-desc" data-en="The agent calls a tool, writes to a database, sends an email, or returns a response." data-he="הסוכן קורא לכלי, כותב למסד נתונים, שולח אימייל, או מחזיר תגובה.">The agent calls a tool, writes to a database, sends an email, or returns a response.</div></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title" data-en="Observe" data-he="תצפית">Observe</div><div class="step-desc" data-en="The result of the action is fed back into context. The agent decides whether to loop or stop." data-he="תוצאת הפעולה מוזנת חזרה להקשר. הסוכן מחליט אם להמשיך בלולאה או לעצור.">The result of the action is fed back into context. The agent decides whether to loop or stop.</div></div></div>
+  </div>
+</section>
+
+<!-- WHEN TO BUILD -->
+<section id="s-when-to-build" class="page-section">
+  <div class="hero">
+    <h1 data-en="When to Build an Agent" data-he="מתי לבנות סוכן">When to Build an Agent</h1>
+    <p class="lead" data-en="Not every problem needs an agent. Here's how to decide." data-he="לא כל בעיה צריכה סוכן. כך מחליטים.">Not every problem needs an agent. Here's how to decide.</p>
+  </div>
+  <div class="callout success">
+    <div class="callout-icon">✅</div>
+    <div><strong data-en="Good candidates for an agent:" data-he="מועמדים טובים לסוכן:">Good candidates for an agent:</strong>
+    <ul class="bullets" style="margin-top:8px">
+      <li data-en="Tasks with multiple steps that depend on each other" data-he="משימות עם שלבים מרובים שתלויים זה בזה">Tasks with multiple steps that depend on each other</li>
+      <li data-en="Tasks that require browsing, reading, or writing external data" data-he="משימות שדורשות גלישה, קריאה או כתיבה של נתונים חיצוניים">Tasks that require browsing, reading, or writing external data</li>
+      <li data-en="Workflows where the path isn't fully known upfront" data-he="זרימות עבודה שבהן הנתיב לא ידוע מראש לגמרי">Workflows where the path isn't fully known upfront</li>
+      <li data-en="Repetitive knowledge work: research, summarization, drafting at scale" data-he="עבודת ידע חוזרת: מחקר, סיכום, ניסוח בקנה מידה">Repetitive knowledge work: research, summarization, drafting at scale</li>
+    </ul></div>
+  </div>
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div><strong data-en="Think twice before building an agent if:" data-he="חשוב פעמיים לפני שבונים סוכן אם:">Think twice before building an agent if:</strong>
+    <ul class="bullets" style="margin-top:8px">
+      <li data-en="A simple prompt or template already solves the problem" data-he="פרומפט פשוט או תבנית כבר פותרים את הבעיה">A simple prompt or template already solves the problem</li>
+      <li data-en="The task is purely deterministic (use regular code)" data-he="המשימה דטרמיניסטית לחלוטין (השתמש בקוד רגיל)">The task is purely deterministic (use regular code)</li>
+      <li data-en="Errors in the output have severe, hard-to-reverse consequences" data-he="טעויות בתפוקה יש להן השלכות חמורות וקשות להיפוך">Errors in the output have severe, hard-to-reverse consequences</li>
+      <li data-en="Latency and cost are critical constraints" data-he="זמן תגובה ועלות הם אילוצים קריטיים">Latency and cost are critical constraints</li>
+    </ul></div>
+  </div>
+  <h2 data-en="The Build vs. Configure vs. Buy Decision" data-he="ההחלטה: לבנות, להגדיר, או לקנות">The Build vs. Configure vs. Buy Decision</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th data-en="Option" data-he="אפשרות">Option</th><th data-en="Best for" data-he="מתאים ל">Best for</th><th data-en="Examples" data-he="דוגמאות">Examples</th></tr>
+      <tr><td data-en="Configure (no-code)" data-he="הגדרה (ללא קוד)">Configure (no-code)</td><td data-en="Quick wins, simple workflows" data-he="ניצחונות מהירים, זרימות פשוטות">Quick wins, simple workflows</td><td>Make, Zapier AI, n8n</td></tr>
+      <tr><td data-en="Build (low-code / API)" data-he="בנייה (low-code / API)">Build (low-code / API)</td><td data-en="Custom logic, full control" data-he="לוגיקה מותאמת, שליטה מלאה">Custom logic, full control</td><td>Claude API, OpenAI API</td></tr>
+      <tr><td data-en="Buy (SaaS agent)" data-he="רכישה (SaaS agent)">Buy (SaaS agent)</td><td data-en="Specific vertical, fast deployment" data-he="ורטיקל ספציפי, פריסה מהירה">Specific vertical, fast deployment</td><td>Intercom Fin, Devin</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- CORE CONCEPTS -->
+<section id="s-concepts" class="page-section">
+  <div class="hero">
+    <div class="badge badge-blue" data-en="Beginner" data-he="מתחילים">Beginner</div>
+    <h1 data-en="Core Concepts" data-he="מושגי יסוד">Core Concepts</h1>
+    <p class="lead" data-en="The 6 building blocks you must understand before writing a single line of agent logic." data-he="6 אבני הבניין שחייבים להבין לפני שכותבים שורת לוגיקה אחת של סוכן.">The 6 building blocks you must understand before writing a single line of agent logic.</p>
+  </div>
+  <h2 data-en="1. The LLM (The Brain)" data-he="1. ה-LLM (המוח)">1. The LLM (The Brain)</h2>
+  <p data-en="The large language model is the reasoning core of your agent. It reads the system prompt + conversation history + tool results, and decides what to do next. Claude and GPT-4 are both strong choices. Claude excels at long-context reasoning and following complex instructions reliably." data-he="המודל השפה הגדול הוא ליבת החשיבה של הסוכן שלך. הוא קורא את ה-system prompt + היסטוריית השיחה + תוצאות הכלים, ומחליט מה לעשות הלאה. Claude ו-GPT-4 הם שניהם בחירות חזקות. Claude מצטיין בהיגיון הקשר ארוך ובביצוע הוראות מורכבות.">The large language model is the reasoning core of your agent. It reads the system prompt + conversation history + tool results, and decides what to do next. Claude and GPT-4 are both strong choices. Claude excels at long-context reasoning and following complex instructions reliably.</p>
+  <h2 data-en="2. The System Prompt" data-he="2. ה-System Prompt">2. The System Prompt</h2>
+  <p data-en="This is the agent's permanent instructions. It defines: who the agent is, what it can and cannot do, how it should behave, what tools it has access to. Treat your system prompt like a job description — be specific." data-he="אלו ההוראות הקבועות של הסוכן. הוא מגדיר: מי הסוכן, מה הוא יכול ולא יכול לעשות, איך עליו להתנהג, לאילו כלים יש לו גישה. התייחס ל-system prompt כמו תיאור תפקיד — היה ספציפי.">This is the agent's permanent instructions. It defines: who the agent is, what it can and cannot do, how it should behave, what tools it has access to. Treat your system prompt like a job description — be specific.</p>
+  <h2 data-en="3. Tools (Actions)" data-he="3. כלים (פעולות)">3. Tools (Actions)</h2>
+  <p data-en="Tools are functions the LLM can call to interact with the outside world: search the web, read a file, call an API, run code. Without tools, an agent can only produce text. With tools, it can take real action." data-he="כלים הם פונקציות ש-LLM יכול לקרוא להן כדי לתקשר עם העולם החיצוני: לחפש ברשת, לקרוא קובץ, לקרוא API, להריץ קוד. ללא כלים, סוכן יכול רק לייצר טקסט. עם כלים, הוא יכול לנקוט פעולה אמיתית.">Tools are functions the LLM can call to interact with the outside world: search the web, read a file, call an API, run code. Without tools, an agent can only produce text. With tools, it can take real action.</p>
+  <h2 data-en="4. Memory" data-he="4. זיכרון">4. Memory</h2>
+  <p data-en="LLMs are stateless by default — they forget everything after each API call. Agents use different memory strategies: in-context (conversation history), external (database lookup), and episodic (summaries of past sessions)." data-he="LLMs הם stateless כברירת מחדל — הם שוכחים הכל אחרי כל קריאת API. סוכנים משתמשים באסטרטגיות זיכרון שונות: in-context (היסטוריית שיחה), חיצוני (חיפוש במסד נתונים), ואפיזודי (סיכומים של פגישות קודמות).">LLMs are stateless by default — they forget everything after each API call. Agents use different memory strategies: in-context (conversation history), external (database lookup), and episodic (summaries of past sessions).</p>
+  <h2 data-en="5. Context Window" data-he="5. חלון ההקשר">5. Context Window</h2>
+  <p data-en="The context window is how much text the LLM can 'see' at once. Claude's context window is up to 200K tokens (~150K words). Long-running agents need strategies to avoid overflowing it: summarization, pruning, retrieval." data-he="חלון ההקשר הוא כמה טקסט ה-LLM יכול 'לראות' בו-זמנית. חלון ההקשר של Claude הוא עד 200K טוקנים (~150K מילים). לסוכנים שרצים זמן רב דרושות אסטרטגיות לחוסר גלישה: סיכום, גיזום, אחזור.">The context window is how much text the LLM can 'see' at once. Claude's context window is up to 200K tokens (~150K words). Long-running agents need strategies to avoid overflowing it: summarization, pruning, retrieval.</p>
+  <h2 data-en="6. Guardrails" data-he="6. מגבלות בטיחות">6. Guardrails</h2>
+  <p data-en="Agents can make mistakes, get stuck in loops, or take unintended actions. Guardrails are safety mechanisms: max iteration limits, human-in-the-loop checkpoints, output validation, rate limiting on destructive actions." data-he="סוכנים יכולים לטעות, להיתקע בלולאות, או לנקוט פעולות לא מכוונות. מגבלות בטיחות הן מנגנוני הגנה: הגבלת מספר איטרציות, נקודות בקרה עם מעורבות אנושית, אימות פלט, הגבלת קצב על פעולות הרסניות.">Agents can make mistakes, get stuck in loops, or take unintended actions. Guardrails are safety mechanisms: max iteration limits, human-in-the-loop checkpoints, output validation, rate limiting on destructive actions.</p>
+</section>
+
+<!-- FIRST AGENT -->
+<section id="s-first-agent" class="page-section">
+  <div class="hero">
+    <div class="badge badge-blue" data-en="Beginner" data-he="מתחילים">Beginner</div>
+    <h1 data-en="Build Your First Agent" data-he="בנה את הסוכן הראשון שלך">Build Your First Agent</h1>
+    <p class="lead" data-en="A practical walkthrough: building a research assistant agent using Claude." data-he="הדרכה מעשית: בניית סוכן עוזר מחקר באמצעות Claude.">A practical walkthrough: building a research assistant agent using Claude.</p>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body">
+      <div class="step-title" data-en="Define the job to be done" data-he="הגדר את המשימה">Define the job to be done</div>
+      <div class="step-desc" data-en="Write one sentence: 'This agent will ___.' Be specific. Vague goals create vague agents. Example: 'This agent will research a company and produce a 1-page competitive brief.'" data-he="כתוב משפט אחד: 'הסוכן הזה יבצע ___.' היה ספציפי. מטרות מעורפלות יוצרות סוכנים מעורפלים. דוגמה: 'הסוכן הזה יחקור חברה ויפיק תקציר תחרותי של עמוד אחד.'">Write one sentence: 'This agent will ___.' Be specific. Vague goals create vague agents.</div>
+    </div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body">
+      <div class="step-title" data-en="Write the system prompt" data-he="כתוב את ה-system prompt">Write the system prompt</div>
+      <div class="step-desc" data-en="Define persona, scope, output format, constraints. Start with 200–400 words. Test, then expand." data-he="הגדר אישיות, היקף, פורמט פלט, אילוצים. התחל עם 200–400 מילים. בדוק, ואז הרחב.">Define persona, scope, output format, constraints. Start with 200–400 words. Test, then expand.</div>
+    </div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body">
+      <div class="step-title" data-en="Choose your tools" data-he="בחר את הכלים שלך">Choose your tools</div>
+      <div class="step-desc" data-en="For a research agent: web search + read URL + write file. Add only what's needed — each tool adds complexity and risk." data-he="לסוכן מחקר: חיפוש ברשת + קריאת URL + כתיבת קובץ. הוסף רק מה שנדרש — כל כלי מוסיף מורכבות וסיכון.">For a research agent: web search + read URL + write file. Add only what's needed.</div>
+    </div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body">
+      <div class="step-title" data-en="Define the loop & stopping condition" data-he="הגדר את הלולאה ותנאי העצירה">Define the loop & stopping condition</div>
+      <div class="step-desc" data-en="When does the agent stop? After N steps? When it produces a specific output? When it calls a 'done' tool? Always define this before you build." data-he="מתי הסוכן עוצר? אחרי N שלבים? כשהוא מייצר פלט ספציפי? כשהוא קורא לכלי 'סיים'? הגדר תמיד את זה לפני הבנייה.">When does the agent stop? After N steps? When it produces a specific output? Always define this before you build.</div>
+    </div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-body">
+      <div class="step-title" data-en="Test with edge cases" data-he="בדוק עם מקרי קצה">Test with edge cases</div>
+      <div class="step-desc" data-en="What happens when a tool fails? When input is ambiguous? When context gets too long? Build for the happy path, then immediately test the unhappy paths." data-he="מה קורה כשכלי נכשל? כשקלט מעורפל? כשהקשר ארוך מדי? בנה לנתיב הרגיל, ואז בדוק מיד את הנתיבים הבעייתיים.">What happens when a tool fails? When input is ambiguous? Build for the happy path, then test the unhappy paths.</div>
+    </div></div>
+  </div>
+  <h2 data-en="Example: Minimal Research Agent (Claude API)" data-he="דוגמה: סוכן מחקר מינימלי (Claude API)">Example: Minimal Research Agent (Claude API)</h2>
+  <pre><code>// System prompt for a research agent
+const systemPrompt = `You are a research assistant.
+Given a company name, you will:
+1. Search for recent news about the company
+2. Find their main product and competitors
+3. Return a structured brief with: summary, key facts, 3 competitors
+
+Use the search_web tool to gather information.
+Stop when you have enough to complete the brief.
+Be concise. Output in JSON.`;
+
+// Tool definition
+const tools = [{
+  name: "search_web",
+  description: "Search the internet for current information",
+  input_schema: {
+    type: "object",
+    properties: {
+      query: { type: "string", description: "Search query" }
+    },
+    required: ["query"]
+  }
+}];</code></pre>
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div data-en="Start with Claude claude-sonnet for development (fast + cheap), switch to claude-opus for production where quality matters most." data-he="התחל עם Claude Sonnet לפיתוח (מהיר + זול), עבור ל-Claude Opus לייצור כשאיכות חשובה ביותר.">Start with <code>claude-sonnet</code> for development (fast + cheap), switch to <code>claude-opus</code> for production where quality matters most.</div>
+  </div>
+</section>
+
+<!-- PROMPTING BASICS -->
+<section id="s-prompt-basics" class="page-section">
+  <div class="hero">
+    <div class="badge badge-blue" data-en="Beginner" data-he="מתחילים">Beginner</div>
+    <h1 data-en="Prompting Basics for Agents" data-he="יסודות הפרומפטינג לסוכנים">Prompting Basics for Agents</h1>
+    <p class="lead" data-en="Agent prompting is different from chatbot prompting. Here's what changes." data-he="פרומפטינג לסוכנים שונה מפרומפטינג לצ׳אטבוטים. הנה מה שמשתנה.">Agent prompting is different from chatbot prompting. Here's what changes.</p>
+  </div>
+  <h2 data-en="System Prompt Structure" data-he="מבנה ה-System Prompt">System Prompt Structure</h2>
+  <p data-en="A strong agent system prompt has 5 parts:" data-he="ל-system prompt חזק לסוכן יש 5 חלקים:">A strong agent system prompt has 5 parts:</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title" data-en="Identity" data-he="זהות">Identity</div><div class="step-desc" data-en="Who is the agent? What is its role?" data-he="מי הסוכן? מה תפקידו?">Who is the agent? What is its role?</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title" data-en="Goal" data-he="מטרה">Goal</div><div class="step-desc" data-en="What is the agent trying to accomplish?" data-he="מה הסוכן מנסה להשיג?">What is the agent trying to accomplish?</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title" data-en="Tools available" data-he="כלים זמינים">Tools available</div><div class="step-desc" data-en="List each tool and when to use it." data-he="רשום כל כלי ומתי להשתמש בו.">List each tool and when to use it.</div></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title" data-en="Constraints" data-he="אילוצים">Constraints</div><div class="step-desc" data-en="What can the agent NOT do? Hard rules." data-he="מה הסוכן לא יכול לעשות? כללים קשיחים.">What can the agent NOT do? Hard rules.</div></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-body"><div class="step-title" data-en="Output format" data-he="פורמט פלט">Output format</div><div class="step-desc" data-en="Exactly how should the final answer look?" data-he="איך בדיוק צריכה להיראות התשובה הסופית?">Exactly how should the final answer look?</div></div></div>
+  </div>
+  <h2 data-en="Prompting Patterns That Work" data-he="דפוסי פרומפטינג שעובדים">Prompting Patterns That Work</h2>
+  <div class="callout success">
+    <div class="callout-icon">✅</div>
+    <div>
+      <strong data-en="Chain of thought:" data-he="שרשרת מחשבה:">Chain of thought:</strong>
+      <span data-en=' Add "Think step by step before acting" to get more reliable planning.' data-he=' הוסף "חשוב שלב אחר שלב לפני פעולה" לקבלת תכנון אמין יותר.'> Add "Think step by step before acting" to get more reliable planning.</span>
+    </div>
+  </div>
+  <div class="callout success">
+    <div class="callout-icon">✅</div>
+    <div>
+      <strong data-en="Explicit stopping:" data-he="עצירה מפורשת:">Explicit stopping:</strong>
+      <span data-en=' Tell the agent exactly when to stop. "Stop after 5 searches" beats "stop when you have enough."' data-he=' אמור לסוכן בדיוק מתי לעצור. "עצור אחרי 5 חיפושים" עדיף על "עצור כשיש מספיק."'> Tell the agent exactly when to stop. "Stop after 5 searches" beats "stop when you have enough."</span>
+    </div>
+  </div>
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div>
+      <strong data-en="Avoid vague permissions:" data-he="הימנע מהרשאות מעורפלות:">Avoid vague permissions:</strong>
+      <span data-en='"Do whatever it takes" will bite you. Always scope the agent\'s authority.' data-he='"עשה מה שצריך" יגרום לבעיות. תמיד הגבל את סמכות הסוכן.'>"Do whatever it takes" will bite you. Always scope the agent's authority.</span>
+    </div>
+  </div>
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div>
+      <strong data-en="Don't over-constrain:" data-he="אל תגביל יותר מדי:">Don't over-constrain:</strong>
+      <span data-en=" Too many rules create contradictions. Keep it to 5–8 core rules." data-he=" יותר מדי כללים יוצרים סתירות. הגבל ל-5–8 כללים מרכזיים."> Too many rules create contradictions. Keep it to 5–8 core rules.</span>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section id="s-tools" class="page-section">
+  <div class="hero">
+    <div class="badge badge-amber" data-en="Intermediate" data-he="בינוני">Intermediate</div>
+    <h1 data-en="Tools & Functions" data-he="כלים ופונקציות">Tools & Functions</h1>
+    <p class="lead" data-en="Tools transform an agent from a text generator into a system that can act. Here's how to design them well." data-he="כלים הופכים סוכן ממחולל טקסט למערכת שיכולה לפעול. כך מעצבים אותם היטב.">Tools transform an agent from a text generator into a system that can act. Here's how to design them well.</p>
+  </div>
+  <h2 data-en="Tool Design Principles" data-he="עקרונות תכנון כלים">Tool Design Principles</h2>
+  <ul class="bullets">
+    <li data-en="One tool, one job. Don't build a 'do_everything' tool." data-he="כלי אחד, משימה אחת. אל תבנה כלי 'עשה הכל'.">One tool, one job. Don't build a 'do_everything' tool.</li>
+    <li data-en="Name tools clearly: search_web, read_file, send_email — not tool1, util_a." data-he="תן שמות ברורים לכלים: search_web, read_file, send_email — לא tool1, util_a.">Name tools clearly: search_web, read_file, send_email.</li>
+    <li data-en="Write descriptions as if explaining to a junior employee — the LLM reads them to decide when to call the tool." data-he="כתוב תיאורים כאילו מסביר לעובד חדש — ה-LLM קורא אותם כדי להחליט מתי לקרוא לכלי.">Write descriptions as if explaining to a junior employee.</li>
+    <li data-en="Always return structured errors — never let a tool silently fail." data-he="תמיד החזר שגיאות מובנות — לעולם אל תאפשר לכלי להיכשל בשקט.">Always return structured errors — never let a tool silently fail.</li>
+    <li data-en="Make destructive tools (delete, send, post) require explicit confirmation." data-he="גרום לכלים הרסניים (מחיקה, שליחה, פרסום) לדרוש אישור מפורש.">Make destructive tools (delete, send, post) require explicit confirmation.</li>
+  </ul>
+  <h2 data-en="Common Tool Categories" data-he="קטגוריות כלים נפוצות">Common Tool Categories</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th data-en="Category" data-he="קטגוריה">Category</th><th data-en="Examples" data-he="דוגמאות">Examples</th><th data-en="Risk level" data-he="רמת סיכון">Risk level</th></tr>
+      <tr><td data-en="Read-only" data-he="קריאה בלבד">Read-only</td><td>search_web, read_file, get_calendar</td><td><span style="color:var(--green)" data-en="Low" data-he="נמוך">Low</span></td></tr>
+      <tr><td data-en="Write / Create" data-he="כתיבה / יצירה">Write / Create</td><td>create_doc, write_file, add_row</td><td><span style="color:var(--amber)" data-en="Medium" data-he="בינוני">Medium</span></td></tr>
+      <tr><td data-en="Send / Publish" data-he="שליחה / פרסום">Send / Publish</td><td>send_email, post_slack, publish_page</td><td><span style="color:var(--red)" data-en="High" data-he="גבוה">High</span></td></tr>
+      <tr><td data-en="Execute" data-he="הרצה">Execute</td><td>run_code, deploy, delete_record</td><td><span style="color:var(--red)" data-en="Very High" data-he="גבוה מאוד">Very High</span></td></tr>
+    </table>
+  </div>
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div data-en="For Claude: tool descriptions are part of the system prompt. Spend as much time on tool descriptions as on the rest of your prompt." data-he="עבור Claude: תיאורי כלים הם חלק מה-system prompt. השקע בתיאורי כלים כמו בשאר הפרומפט.">For Claude: tool descriptions are part of the system prompt. Spend as much time on tool descriptions as on the rest of your prompt.</div>
+  </div>
+</section>
+
+<!-- MEMORY -->
+<section id="s-memory" class="page-section">
+  <div class="hero">
+    <div class="badge badge-amber" data-en="Intermediate" data-he="בינוני">Intermediate</div>
+    <h1 data-en="Memory & Context" data-he="זיכרון והקשר">Memory & Context</h1>
+    <p class="lead" data-en="How to give your agent a reliable memory without blowing the context window." data-he="איך לתת לסוכן שלך זיכרון אמין מבלי להגיע לגבול חלון ההקשר.">How to give your agent a reliable memory without blowing the context window.</p>
+  </div>
+  <h2 data-en="The 4 Types of Agent Memory" data-he="4 סוגי זיכרון לסוכן">The 4 Types of Agent Memory</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">📜</div>
+      <div class="card-title" data-en="In-Context" data-he="בתוך ההקשר">In-Context</div>
+      <div class="card-desc" data-en="The full conversation history. Simple, but limited by token count." data-he="היסטוריית השיחה המלאה. פשוט, אבל מוגבל במספר טוקנים.">The full conversation history. Simple, but limited by token count.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🗄️</div>
+      <div class="card-title" data-en="External DB" data-he="מסד נתונים חיצוני">External DB</div>
+      <div class="card-desc" data-en="Store facts in a database; retrieve them via a tool call." data-he="שמור עובדות במסד נתונים; אחזר אותן דרך קריאה לכלי.">Store facts in a database; retrieve them via a tool call.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔍</div>
+      <div class="card-title" data-en="RAG (Retrieval)" data-he="RAG (אחזור)">RAG (Retrieval)</div>
+      <div class="card-desc" data-en="Embed documents; retrieve only what's relevant to the current query." data-he="הטמע מסמכים; אחזר רק את מה שרלוונטי לשאילתה הנוכחית.">Embed documents; retrieve only what's relevant to the current query.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📝</div>
+      <div class="card-title" data-en="Episodic Summary" data-he="סיכום אפיזודי">Episodic Summary</div>
+      <div class="card-desc" data-en="Summarize past sessions and inject the summary at the start of new ones." data-he="סכם פגישות קודמות והזרק את הסיכום בתחילת פגישות חדשות.">Summarize past sessions and inject the summary at the start of new ones.</div>
+    </div>
+  </div>
+  <h2 data-en="Context Window Management" data-he="ניהול חלון ההקשר">Context Window Management</h2>
+  <p data-en="Rule of thumb: keep context under 70% of the model's max to avoid degraded performance. Strategies:" data-he="כלל אצבע: שמור על הקשר מתחת ל-70% מהמקסימום של המודל כדי למנוע ביצועים ירודים. אסטרטגיות:">Rule of thumb: keep context under 70% of the model's max to avoid degraded performance.</p>
+  <ul class="bullets">
+    <li data-en="Summarize tool results before adding to context (tool output is often verbose)" data-he="סכם תוצאות כלים לפני הוספתם להקשר (פלט כלים לרוב מפורט מדי)">Summarize tool results before adding to context</li>
+    <li data-en="Use 'sliding window' — keep only the last N messages plus system prompt" data-he="השתמש ב-'חלון גולל' — שמור רק את N ההודעות האחרונות בתוספת system prompt">Use 'sliding window' — keep only the last N messages</li>
+    <li data-en="Store intermediate results externally and retrieve them only when needed" data-he="שמור תוצאות ביניים חיצונית ואחזר אותן רק כשנחוץ">Store intermediate results externally and retrieve them only when needed</li>
+  </ul>
+</section>
+
+<!-- FLOWS -->
+<section id="s-flows" class="page-section">
+  <div class="hero">
+    <div class="badge badge-amber" data-en="Intermediate" data-he="בינוני">Intermediate</div>
+    <h1 data-en="Multi-Step Flows" data-he="זרימות מרובות שלבים">Multi-Step Flows</h1>
+    <p class="lead" data-en="Design reliable agent workflows that handle branching, errors, and partial results." data-he="תכנן זרימות עבודה אמינות לסוכנים שמטפלות בהסתעפויות, שגיאות ותוצאות חלקיות.">Design reliable agent workflows that handle branching, errors, and partial results.</p>
+  </div>
+  <h2 data-en="Flow Patterns" data-he="דפוסי זרימה">Flow Patterns</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th data-en="Pattern" data-he="דפוס">Pattern</th><th data-en="When to use" data-he="מתי להשתמש">When to use</th><th data-en="Example" data-he="דוגמה">Example</th></tr>
+      <tr><td><strong data-en="Sequential" data-he="רצף">Sequential</strong></td><td data-en="Steps must happen in order" data-he="שלבים חייבים להתבצע ברצף">Steps must happen in order</td><td data-en="Gather → Analyze → Draft → Send" data-he="איסוף → ניתוח → ניסוח → שליחה">Gather → Analyze → Draft → Send</td></tr>
+      <tr><td><strong data-en="Parallel" data-he="מקבילי">Parallel</strong></td><td data-en="Independent sub-tasks" data-he="תת-משימות עצמאיות">Independent sub-tasks</td><td data-en="Search 3 sources simultaneously" data-he="חיפוש ב-3 מקורות בו-זמנית">Search 3 sources simultaneously</td></tr>
+      <tr><td><strong data-en="Conditional" data-he="מותנה">Conditional</strong></td><td data-en="Branch on data or confidence" data-he="הסתעפות לפי נתונים או ביטחון">Branch on data or confidence</td><td data-en="If low confidence → ask human" data-he="אם ביטחון נמוך → שאל אדם">If low confidence → ask human</td></tr>
+      <tr><td><strong data-en="Retry loop" data-he="לולאת ניסיון חוזר">Retry loop</strong></td><td data-en="Tool failures, validation errors" data-he="כשלי כלים, שגיאות אימות">Tool failures, validation errors</td><td data-en="Try up to 3 times, then escalate" data-he="נסה עד 3 פעמים, ואז העלה לדרג">Try up to 3 times, then escalate</td></tr>
+    </table>
+  </div>
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div data-en="Always add a maximum step count. An agent with no upper bound will keep looping (and burning tokens) on ambiguous tasks. 20–30 steps is usually enough for complex tasks." data-he="תמיד הוסף מספר שלבים מקסימלי. סוכן ללא גבול עליון ימשיך בלולאה (ויבזבז טוקנים) על משימות מעורפלות. 20–30 שלבים בדרך כלל מספיקים למשימות מורכבות.">Always add a maximum step count. An agent with no upper bound will keep looping on ambiguous tasks. 20–30 steps is usually enough.</div>
+  </div>
+</section>
+
+<!-- MULTI-AGENT -->
+<section id="s-multi-agent" class="page-section">
+  <div class="hero">
+    <div class="badge badge-amber" data-en="Advanced" data-he="מתקדמים">Advanced</div>
+    <h1 data-en="Multi-Agent Systems" data-he="מערכות מרובות סוכנים">Multi-Agent Systems</h1>
+    <p class="lead" data-en="When one agent isn't enough. Orchestrate multiple specialized agents to tackle complex, parallelizable workflows." data-he="כשסוכן אחד לא מספיק. תזמר מספר סוכנים מתמחים לטיפול בזרימות עבודה מורכבות ומקבילות.">When one agent isn't enough. Orchestrate multiple specialized agents to tackle complex, parallelizable workflows.</p>
+  </div>
+  <h2 data-en="Orchestrator–Subagent Pattern" data-he="דפוס מתזמר–תת-סוכן">Orchestrator–Subagent Pattern</h2>
+  <p data-en="One orchestrator agent decomposes the goal and delegates to specialized subagents. Each subagent is an expert in a narrow task. Results flow back to the orchestrator, which synthesizes them." data-he="סוכן מתזמר אחד מפרק את המטרה ומאצה לתת-סוכנים מתמחים. כל תת-סוכן הוא מומחה במשימה צרה. התוצאות זורמות חזרה למתזמר, שמסנתז אותן.">One orchestrator agent decomposes the goal and delegates to specialized subagents.</p>
+  <div class="callout success">
+    <div class="callout-icon">✅</div>
+    <div data-en="Good uses of multi-agent: long research tasks (parallel search + analysis), software dev (planner + coder + reviewer), content production (researcher + writer + editor)." data-he="שימושים טובים למרובי סוכנים: מחקר ארוך (חיפוש מקבילי + ניתוח), פיתוח תוכנה (מתכנן + מקודד + בודק), ייצור תוכן (חוקר + כותב + עורך).">Good uses of multi-agent: long research tasks (parallel search + analysis), software dev (planner + coder + reviewer), content production (researcher + writer + editor).</div>
+  </div>
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div data-en="Multi-agent adds latency, cost, and debugging complexity. Start with a single agent. Only split when you hit a clear wall." data-he="מרובי סוכנים מוסיף זמן תגובה, עלות ומורכבות ניפוי שגיאות. התחל עם סוכן יחיד. חלק רק כשאתה פוגש מכשול ברור.">Multi-agent adds latency, cost, and debugging complexity. Start with a single agent. Only split when you hit a clear wall.</div>
+  </div>
+  <h2 data-en="Trust & Permission Boundaries" data-he="גבולות אמון וגישה">Trust & Permission Boundaries</h2>
+  <p data-en="Subagents should have minimum required permissions. The orchestrator should not blindly trust subagent output — validate before acting on it. This prevents prompt injection attacks from propagating through the system." data-he="לתת-סוכנים צריכות להיות ההרשאות המינימליות הנדרשות. המתזמר לא צריך לסמוך בעיניים עצומות על פלט תת-הסוכן — אמת לפני פעולה. זה מונע התקפות הזרקת פרומפט מלהתפשט במערכת.">Subagents should have minimum required permissions. The orchestrator should validate before acting on subagent output.</p>
+</section>
+
+<!-- EVALS -->
+<section id="s-evals" class="page-section">
+  <div class="hero">
+    <div class="badge badge-amber" data-en="Advanced" data-he="מתקדמים">Advanced</div>
+    <h1 data-en="Evals & Testing" data-he="בדיקות והערכה">Evals & Testing</h1>
+    <p class="lead" data-en="You can't improve what you don't measure. Here's how PMs should think about evaluating agents." data-he="לא ניתן לשפר מה שלא מודדים. כך מנהלי מוצר צריכים לחשוב על הערכת סוכנים.">You can't improve what you don't measure. Here's how PMs should think about evaluating agents.</p>
+  </div>
+  <h2 data-en="What to Measure" data-he="מה למדוד">What to Measure</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th data-en="Metric" data-he="מדד">Metric</th><th data-en="What it tells you" data-he="מה זה מגלה">What it tells you</th></tr>
+      <tr><td data-en="Task completion rate" data-he="שיעור השלמת משימות">Task completion rate</td><td data-en="Does the agent finish what it starts?" data-he="האם הסוכן מסיים מה שהוא מתחיל?">Does the agent finish what it starts?</td></tr>
+      <tr><td data-en="Output quality score" data-he="ציון איכות פלט">Output quality score</td><td data-en="Is the result accurate and useful?" data-he="האם התוצאה מדויקת ושימושית?">Is the result accurate and useful?</td></tr>
+      <tr><td data-en="Steps per task" data-he="שלבים למשימה">Steps per task</td><td data-en="Efficiency. High count = inefficient planning." data-he="יעילות. ספירה גבוהה = תכנון לא יעיל.">Efficiency. High step count = inefficient planning.</td></tr>
+      <tr><td data-en="Cost per task" data-he="עלות למשימה">Cost per task</td><td data-en="Token spend. Essential for production." data-he="הוצאת טוקנים. חיוני לייצור.">Token spend. Essential for production.</td></tr>
+      <tr><td data-en="Error rate" data-he="שיעור שגיאות">Error rate</td><td data-en="How often does the agent fail or hallucinate?" data-he="כמה עתים הסוכן נכשל או מהזה?">How often does the agent fail or hallucinate?</td></tr>
+    </table>
+  </div>
+  <h2 data-en="Building an Eval Suite" data-he="בניית חבילת הערכה">Building an Eval Suite</h2>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title" data-en="Collect 20–50 real test cases" data-he="אסוף 20–50 מקרי בדיקה אמיתיים">Collect 20–50 real test cases</div><div class="step-desc" data-en="Mix: easy, hard, edge cases, and failure modes you've seen." data-he="ערבב: קל, קשה, מקרי קצה ומצבי כישלון שראית.">Mix: easy, hard, edge cases, and failure modes you've seen.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title" data-en="Define a scoring rubric" data-he="הגדר רובריקת ניקוד">Define a scoring rubric</div><div class="step-desc" data-en="LLM-as-judge works well: use a grader prompt to score output 1–5." data-he="LLM כשופט עובד היטב: השתמש בפרומפט מעריך לניקוד פלט 1–5.">LLM-as-judge works well: use a grader prompt to score output 1–5.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title" data-en="Run evals on every prompt change" data-he="הרץ הערכות על כל שינוי בפרומפט">Run evals on every prompt change</div><div class="step-desc" data-en="Prompt engineering without evals is guesswork." data-he="הנדסת פרומפטים ללא הערכות היא ניחוש.">Prompt engineering without evals is guesswork.</div></div></div>
+  </div>
+</section>
+
+<!-- PRODUCTION -->
+<section id="s-production" class="page-section">
+  <div class="hero">
+    <div class="badge badge-amber" data-en="Advanced" data-he="מתקדמים">Advanced</div>
+    <h1 data-en="Production & Safety" data-he="ייצור ובטיחות">Production & Safety</h1>
+    <p class="lead" data-en="Shipping an agent to real users is different from building a demo. Here's what changes." data-he="משלוח סוכן למשתמשים אמיתיים שונה מבניית הדגמה. הנה מה שמשתנה.">Shipping an agent to real users is different from building a demo. Here's what changes.</p>
+  </div>
+  <h2 data-en="Production Checklist" data-he="רשימת תיוג לייצור">Production Checklist</h2>
+  <ul class="checklist">
+    <li data-en="Rate limiting on all destructive tool calls" data-he="הגבלת קצב על כל קריאות כלים הרסניות">Rate limiting on all destructive tool calls</li>
+    <li data-en="Human-in-the-loop for high-stakes actions (send, publish, delete)" data-he="מעורבות אנושית לפעולות בסיכון גבוה (שליחה, פרסום, מחיקה)">Human-in-the-loop for high-stakes actions (send, publish, delete)</li>
+    <li data-en="Hard max on iterations (prevents infinite loops)" data-he="מקסימום קשיח על איטרציות (מונע לולאות אינסופיות)">Hard max on iterations (prevents infinite loops)</li>
+    <li data-en="Output validation before any external action" data-he="אימות פלט לפני כל פעולה חיצונית">Output validation before any external action</li>
+    <li data-en="Full logging: every step, tool call, and result" data-he="רישום מלא: כל שלב, קריאת כלי ותוצאה">Full logging: every step, tool call, and result</li>
+    <li data-en="Alerting on error rate spikes" data-he="התראות על קפיצות בשיעור שגיאות">Alerting on error rate spikes</li>
+    <li data-en="Graceful degradation: agent should fail safely, not silently" data-he="שדרוג נחיתה חינני: הסוכן צריך להיכשל בצורה בטוחה, לא בשקט">Graceful degradation: agent should fail safely, not silently</li>
+    <li data-en="Cost budget per run — alert when exceeded" data-he="תקציב עלות לכל הרצה — התרע כשחורג">Cost budget per run — alert when exceeded</li>
+  </ul>
+  <div class="callout danger">
+    <div class="callout-icon">🚨</div>
+    <div data-en="Prompt injection is real. If your agent reads from user-controlled content (emails, docs, web pages), a malicious actor can embed instructions that hijack your agent. Always sanitize inputs before including in context." data-he="הזרקת פרומפט היא אמיתית. אם הסוכן שלך קורא מתוכן שנשלט על ידי משתמש (אימיילים, מסמכים, דפי אינטרנט), גורם זדוני יכול להטמיע הוראות שחוטפות את הסוכן שלך. תמיד נקה קלטים לפני הכנסתם להקשר.">Prompt injection is real. If your agent reads from user-controlled content (emails, docs, web pages), a malicious actor can embed instructions that hijack your agent. Always sanitize inputs.</div>
+  </div>
+</section>
+
+<!-- PM CHECKLIST -->
+<section id="s-checklist" class="page-section">
+  <div class="hero">
+    <div class="badge badge-green" data-en="Reference" data-he="עזר">Reference</div>
+    <h1 data-en="PM Checklist: Ship an Agent" data-he="רשימת תיוג למנהל מוצר: שחרור סוכן">PM Checklist: Ship an Agent</h1>
+    <p class="lead" data-en="From idea to production. Check every box." data-he="מרעיון לייצור. סמן כל תיבה.">From idea to production. Check every box.</p>
+  </div>
+  <h2 data-en="Discovery" data-he="גילוי">Discovery</h2>
+  <ul class="checklist">
+    <li data-en="Defined the exact job-to-be-done in one sentence" data-he="הגדרת את המשימה המדויקת במשפט אחד">Defined the exact job-to-be-done in one sentence</li>
+    <li data-en="Validated that an agent is the right solution (not a simple prompt or script)" data-he="אימתת שסוכן הוא הפתרון הנכון (לא פרומפט פשוט או סקריפט)">Validated that an agent is the right solution</li>
+    <li data-en="Identified the user and their actual workflow" data-he="זיהית את המשתמש וזרימת העבודה האמיתית שלו">Identified the user and their actual workflow</li>
+  </ul>
+  <h2 data-en="Design" data-he="עיצוב">Design</h2>
+  <ul class="checklist">
+    <li data-en="System prompt written and reviewed by someone not on the team" data-he="system prompt נכתב ונבדק על ידי מישהו שאינו בצוות">System prompt written and reviewed by someone not on the team</li>
+    <li data-en="Tools defined with clear names, descriptions, and error handling" data-he="כלים מוגדרים עם שמות, תיאורים וטיפול בשגיאות ברורים">Tools defined with clear names, descriptions, and error handling</li>
+    <li data-en="Stopping conditions explicitly defined" data-he="תנאי עצירה מוגדרים במפורש">Stopping conditions explicitly defined</li>
+    <li data-en="Edge cases documented: empty input, tool failure, ambiguous request" data-he="מקרי קצה מתועדים: קלט ריק, כישלון כלי, בקשה מעורפלת">Edge cases documented: empty input, tool failure, ambiguous request</li>
+  </ul>
+  <h2 data-en="Build & Test" data-he="בנייה ובדיקה">Build & Test</h2>
+  <ul class="checklist">
+    <li data-en="Tested with 20+ diverse inputs" data-he="נבדק עם 20+ קלטים מגוונים">Tested with 20+ diverse inputs</li>
+    <li data-en="Eval suite created and baseline score recorded" data-he="חבילת הערכה נוצרה וציון בסיס נרשם">Eval suite created and baseline score recorded</li>
+    <li data-en="Cost per task estimated and acceptable" data-he="עלות למשימה הוערכה ומקובלת">Cost per task estimated and acceptable</li>
+    <li data-en="Average latency tested and acceptable" data-he="זמן תגובה ממוצע נבדק ומקובל">Average latency tested and acceptable</li>
+  </ul>
+  <h2 data-en="Launch" data-he="השקה">Launch</h2>
+  <ul class="checklist">
+    <li data-en="Logging enabled for all steps and tool calls" data-he="רישום מופעל לכל השלבים וקריאות הכלים">Logging enabled for all steps and tool calls</li>
+    <li data-en="Rate limits and guardrails in production" data-he="הגבלות קצב ומגבלות בטיחות בייצור">Rate limits and guardrails in production</li>
+    <li data-en="On-call process defined for agent failures" data-he="תהליך כוננות מוגדר לכשלים בסוכן">On-call process defined for agent failures</li>
+    <li data-en="User feedback mechanism in place" data-he="מנגנון משוב משתמשים קיים">User feedback mechanism in place</li>
+    <li data-en="Rollback plan documented" data-he="תוכנית חזרה מתועדת">Rollback plan documented</li>
+  </ul>
+</section>
+
+<!-- TIPS -->
+<section id="s-tips" class="page-section">
+  <div class="hero">
+    <div class="badge badge-green" data-en="Reference" data-he="עזר">Reference</div>
+    <h1 data-en="Tips & Tricks" data-he="טיפים וטריקים">Tips & Tricks</h1>
+    <p class="lead" data-en="Hard-won insights from building real agents. Read these before you start." data-he="תובנות מניסיון בבניית סוכנים אמיתיים. קרא אלו לפני שמתחיל.">Hard-won insights from building real agents. Read these before you start.</p>
+  </div>
+  <h3 data-en="🧠 Prompting" data-he="🧠 פרומפטינג">🧠 Prompting</h3>
+  <ul class="bullets">
+    <li data-en="Give the agent a persona. 'You are a senior analyst' produces better output than 'You are an assistant.'" data-he="תן לסוכן אישיות. 'אתה אנליסט בכיר' מייצר פלט טוב יותר מ'אתה עוזר.'">Give the agent a persona. "You are a senior analyst" produces better output than "You are an assistant."</li>
+    <li data-en="Use XML tags to structure your system prompt — Claude responds especially well to <instructions>, <tools>, <output_format>." data-he="השתמש בתגיות XML למבנה ה-system prompt שלך — Claude מגיב במיוחד טוב ל-<instructions>, <tools>, <output_format>.">Use XML tags to structure your system prompt — Claude responds especially well to them.</li>
+    <li data-en="Show examples in the prompt, not just rules. One good example beats three paragraphs of instructions." data-he="הראה דוגמאות בפרומפט, לא רק כללים. דוגמה טובה אחת עולה על שלושה פסקאות של הוראות.">Show examples in the prompt. One good example beats three paragraphs of instructions.</li>
+    <li data-en="Version your prompts. Treat them like code: commit, review, test before deploying." data-he="גרסה את הפרומפטים שלך. התייחס אליהם כמו קוד: commit, review, בדוק לפני פריסה.">Version your prompts like code: commit, review, test before deploying.</li>
+  </ul>
+  <h3 data-en="🔧 Tools" data-he="🔧 כלים">🔧 Tools</h3>
+  <ul class="bullets">
+    <li data-en="Add a 'ask_for_clarification' tool. Letting the agent ask questions reduces errors dramatically." data-he="הוסף כלי 'ask_for_clarification'. מתן לסוכן לשאול שאלות מפחית שגיאות דרמטית.">Add a 'ask_for_clarification' tool. Letting the agent ask questions reduces errors dramatically.</li>
+    <li data-en="Tool descriptions matter as much as code. A well-described tool is called correctly; a vague one is called wrong." data-he="תיאורי כלים חשובים כמו קוד. כלי מתואר היטב נקרא נכון; כלי מעורפל נקרא לא נכון.">Tool descriptions matter as much as code.</li>
+    <li data-en="Log every tool call and its result. This is your primary debugging surface." data-he="רשום כל קריאת כלי ותוצאתה. זהו משטח ניפוי השגיאות הראשי שלך.">Log every tool call and its result. This is your primary debugging surface.</li>
+  </ul>
+  <h3 data-en="🚀 Shipping" data-he="🚀 שחרור">🚀 Shipping</h3>
+  <ul class="bullets">
+    <li data-en="Ship small, iterate fast. A scoped agent you can trust beats a powerful one you can't control." data-he="שחרר קטן, חזר מהר. סוכן מוגבל שאפשר לסמוך עליו עדיף על סוכן עוצמתי שלא ניתן לשלוט בו.">Ship small, iterate fast. A scoped agent you can trust beats a powerful one you can't control.</li>
+    <li data-en="Shadow mode first: run the agent in parallel with the human process before replacing it." data-he="מצב צל קודם: הרץ את הסוכן במקביל לתהליך האנושי לפני החלפתו.">Shadow mode first: run the agent in parallel with the human process before replacing it.</li>
+    <li data-en="Build a feedback loop: the best way to improve an agent is to read 50 bad outputs and ask 'why.'" data-he="בנה לולאת משוב: הדרך הטובה ביותר לשפר סוכן היא לקרוא 50 פלטים רעים ולשאול 'למה.'">Build a feedback loop: read 50 bad outputs and ask 'why.'</li>
+  </ul>
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div data-en="The #1 mistake: building a complex multi-agent system before validating that the core task can be done well by a single agent with simple tools." data-he="הטעות #1: בניית מערכת מרובת סוכנים מורכבת לפני אימות שהמשימה הליבתית יכולה להתבצע היטב על ידי סוכן יחיד עם כלים פשוטים.">The #1 mistake: building a complex multi-agent system before validating the core task with a single agent and simple tools.</div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section id="s-glossary" class="page-section">
+  <div class="hero">
+    <div class="badge badge-green" data-en="Reference" data-he="עזר">Reference</div>
+    <h1 data-en="Glossary" data-he="מילון מונחים">Glossary</h1>
+    <p class="lead" data-en="Quick definitions for every term you'll encounter when building agents." data-he="הגדרות מהירות לכל מונח שתיתקל בו בבניית סוכנים.">Quick definitions for every term you'll encounter when building agents.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <tr><th data-en="Term" data-he="מונח">Term</th><th data-en="Definition" data-he="הגדרה">Definition</th></tr>
+      <tr><td><strong>LLM</strong></td><td data-en="Large Language Model — the AI model (e.g., Claude, GPT-4) that powers the agent's reasoning." data-he="מודל שפה גדול — מודל ה-AI (למשל Claude, GPT-4) שמניע את החשיבה של הסוכן.">Large Language Model — the AI model that powers the agent's reasoning.</td></tr>
+      <tr><td><strong>System Prompt</strong></td><td data-en="Permanent instructions given to the LLM before any user message. Defines the agent's identity, tools, and rules." data-he="הוראות קבועות הניתנות ל-LLM לפני כל הודעת משתמש. מגדיר את זהות הסוכן, כליו וכלליו.">Permanent instructions given to the LLM before any user message.</td></tr>
+      <tr><td><strong>Tool Call</strong></td><td data-en="When the LLM chooses to invoke a function instead of generating text — e.g., calling 'search_web'." data-he="כשה-LLM בוחר לקרוא לפונקציה במקום לייצר טקסט — למשל קריאה ל-'search_web'.">When the LLM invokes a function instead of generating text.</td></tr>
+      <tr><td><strong>Context Window</strong></td><td data-en="The maximum amount of text an LLM can process at once. Claude: 200K tokens." data-he="הכמות המקסימלית של טקסט שLLM יכול לעבד בבת אחת. Claude: 200K טוקנים.">The maximum text an LLM can process at once. Claude: 200K tokens.</td></tr>
+      <tr><td><strong>RAG</strong></td><td data-en="Retrieval-Augmented Generation — a memory pattern where relevant documents are retrieved and injected into context." data-he="יצירה מוגברת באחזור — דפוס זיכרון שבו מסמכים רלוונטיים מאוחזרים ומוזרקים להקשר.">Retrieval-Augmented Generation — a memory pattern where relevant documents are retrieved and injected into context.</td></tr>
+      <tr><td><strong>Guardrails</strong></td><td data-en="Safety mechanisms that constrain agent behavior: max steps, input validation, output filters." data-he="מנגנוני בטיחות שמגבילים התנהגות סוכן: מקסימום שלבים, אימות קלט, מסנני פלט.">Safety mechanisms that constrain agent behavior.</td></tr>
+      <tr><td><strong>Agentic Loop</strong></td><td data-en="The perceive → think → act → observe cycle that agents repeat until a goal is met." data-he="מחזור תפיסה → חשיבה → פעולה → תצפית שסוכנים חוזרים עליו עד השגת מטרה.">The perceive → think → act → observe cycle that agents repeat.</td></tr>
+      <tr><td><strong>Prompt Injection</strong></td><td data-en="An attack where malicious instructions hidden in content (emails, docs) hijack the agent's behavior." data-he="התקפה שבה הוראות זדוניות מוסתרות בתוכן (אימיילים, מסמכים) חוטפות את התנהגות הסוכן.">An attack where malicious instructions in content hijack the agent.</td></tr>
+      <tr><td><strong>Orchestrator</strong></td><td data-en="In multi-agent systems, the top-level agent that decomposes goals and delegates to subagents." data-he="במערכות מרובות סוכנים, הסוכן ברמה העליונה שמפרק מטרות ומאצה לתת-סוכנים.">In multi-agent systems, the top-level agent that delegates to subagents.</td></tr>
+      <tr><td><strong>Eval</strong></td><td data-en="A test case used to measure agent quality. A good eval suite has 20–50 diverse examples with scoring criteria." data-he="מקרה בדיקה למדידת איכות סוכן. חבילת הערכה טובה כוללת 20–50 דוגמאות מגוונות עם קריטריוני ניקוד.">A test case used to measure agent quality.</td></tr>
+    </table>
+  </div>
+</section>
+
+</main>
+</div>
+
+<!-- CHAT PANEL -->
+<div id="chat-panel">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-dot"></div>
+      <div>
+        <div class="chat-title" data-en="Agent Expert" data-he="מומחה סוכנים">Agent Expert</div>
+        <div class="chat-sub" data-en="Ask anything about building agents" data-he="שאל כל דבר על בניית סוכנים">Ask anything about building agents</div>
+      </div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">×</button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="msg bot" id="welcome-msg">👋 Hi! I'm your agent-building expert. Ask me anything — prompting, tools, multi-agent design, Claude API, production gotchas. What are you working on?</div>
+  </div>
+  <div class="chat-suggestions" id="suggestions">
+    <span class="suggestion-chip" onclick="sendSuggestion(this)">How do I write a system prompt?</span>
+    <span class="suggestion-chip" onclick="sendSuggestion(this)">When should I use multi-agent?</span>
+    <span class="suggestion-chip" onclick="sendSuggestion(this)">How do I handle tool errors?</span>
+    <span class="suggestion-chip" onclick="sendSuggestion(this)">What's the best memory strategy?</span>
+  </div>
+  <div class="chat-input-row">
+    <textarea id="chat-input" rows="1" placeholder="Ask about building agents..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button id="chat-send" onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+// ── LANGUAGE ──
+let lang = 'en';
+function toggleLang() {
+  lang = lang === 'en' ? 'he' : 'en';
+  document.documentElement.lang = lang;
+  document.body.dir = lang === 'he' ? 'rtl' : 'ltr';
+  document.getElementById('lang-btn').textContent = lang === 'en' ? 'עב' : 'EN';
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.innerHTML = el.getAttribute('data-' + lang) || el.innerHTML;
+  });
+  // Update welcome message
+  const welcome = document.getElementById('welcome-msg');
+  if (welcome) {
+    welcome.textContent = lang === 'he'
+      ? '👋 שלום! אני המומחה שלך לבניית סוכנים. שאל אותי כל דבר — פרומפטינג, כלים, עיצוב מרובי סוכנים, Claude API, מלכודות ייצור. על מה אתה עובד?'
+      : '👋 Hi! I\'m your agent-building expert. Ask me anything — prompting, tools, multi-agent design, Claude API, production gotchas. What are you working on?';
+  }
+}
+
+// ── NAV ──
+function showSection(id) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
+  const el = document.getElementById('s-' + id);
+  if (el) el.classList.add('visible');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) {
+      n.classList.add('active');
+    }
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── CHAT ──
+let chatOpen = false;
+let chatHistory = [];
+const SYSTEM = `You are an expert AI agent-building guide for product managers. You have deep knowledge of:
+- Building agents with Claude (Anthropic) and OpenAI APIs
+- System prompt design, tool/function calling, memory strategies (RAG, in-context, external DB)
+- Multi-agent orchestration patterns
+- Testing, evals, and production deployment
+- Common mistakes and how to avoid them
+
+Your answers are:
+- Concise and direct (this is a PM audience, not engineers)
+- Practical — always include a concrete example or action step
+- Honest about tradeoffs
+- Formatted with clear structure when needed
+
+Answer in the same language as the user's question (Hebrew or English).`;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  document.getElementById('chat-panel').classList.toggle('open', chatOpen);
+  if (chatOpen) setTimeout(() => document.getElementById('chat-input').focus(), 100);
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = '';
+  document.getElementById('suggestions').style.display = 'none';
+  appendMsg(text, 'user');
+  chatHistory.push({ role: 'user', content: text });
+  const btn = document.getElementById('chat-send');
+  btn.disabled = true;
+  const thinking = appendMsg(lang === 'he' ? 'חושב...' : 'Thinking...', 'bot thinking');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM,
+        messages: chatHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || (lang === 'he' ? 'שגיאה — נסה שוב.' : 'Error — please try again.');
+    thinking.remove();
+    appendMsg(reply, 'bot');
+    chatHistory.push({ role: 'assistant', content: reply });
+  } catch (e) {
+    thinking.remove();
+    appendMsg(lang === 'he' ? 'שגיאת חיבור. נסה שוב.' : 'Connection error. Please try again.', 'bot');
+  }
+  btn.disabled = false;
+}
+
+function appendMsg(text, cls) {
+  const msgs = document.getElementById('chat-messages');
+  const el = document.createElement('div');
+  el.className = 'msg ' + cls;
+  el.textContent = text;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+  return el;
+}
+
+function sendSuggestion(el) {
+  document.getElementById('chat-input').value = el.textContent;
+  sendMessage();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = '';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+</script>
+</body>
+</html>
